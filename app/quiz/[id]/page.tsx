@@ -23,7 +23,7 @@ async function Quiz({
     a.is_correct
   FROM quizzes AS q
   JOIN answers AS a ON q.quiz_id = a.quiz_id
-  WHERE q.quiz_id = ${id}
+  WHERE q.quiz_id = ${id};
   `;
 
   // SELECT is the keyword used to select data from a database.
