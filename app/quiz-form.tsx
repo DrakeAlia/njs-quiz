@@ -1,6 +1,21 @@
+import { revalidatePath } from "next/cache";
 import postgres from "postgres";
 
 const sql = postgres(process.env.POSTGRES_URL!);
+
+function Answer({ id }: { id: number }) {
+  return (
+    <label>
+      Answer {id}:
+      <input
+        className="bg-gray-500 border-2 border-gray-50 hover:bg-blue-400 p-1 rounded w-full"
+        type="text"
+        name={`answer-${id}`}
+      />
+      <input type="checkbox" name={`check-${id}`} />
+    </label>
+  );
+}
 
 export default function QuizForm() {
   async function createQuiz(formData: FormData) {
@@ -14,48 +29,66 @@ export default function QuizForm() {
         isCorrect: formData.get(`check-${id}`) === "on",
       };
     });
+
+    // console.log({ title, description, question, answers });
+
+    await sql`
+        WITH new_quiz AS (
+            INSERT INTO quizzes (title, description, question_text, 
+            created_at)
+            VALUES (${title}, ${description}, ${question}, NOW())
+            RETURNING quiz_id
+        )
+        INSERT INTO answers (quiz_id, answer_text, is_correct)
+        VALUES
+            ( (SELECT quiz_id FROM new_quiz), ${answers[0].answer}, 
+            ${answers[0].isCorrect}),
+            ( (SELECT quiz_id FROM new_quiz), ${answers[1].answer}, 
+            ${answers[1].isCorrect}),
+            ( (SELECT quiz_id FROM new_quiz), ${answers[2].answer}, 
+            ${answers[2].isCorrect})
+    `;
+
+    revalidatePath("/");
   }
 
   return (
-    <form action={createQuiz}>
-      <label>
-        Title
-        <input name="title" />
+    <form className="flex flex-col p-2 mt-8 max-w-xs" action={createQuiz}>
+      <h3 className="text-lg font-bold text-center">Create Quiz</h3>
+      <label className="mt-2">
+        Title:
+        <input
+          className="bg-gray-500 border-2 border-gray-200 hover:bg-blue-400 rounded p-1 mt-2 w-full"
+          type="text"
+          name="title"
+        />
       </label>
       <label>
-        Description
-        <input name="description" />
+        Description:
+        <input
+          className="bg-gray-500 border-2 border-gray-200 hover:bg-blue-400 rounded p-1 mt-2 w-full"
+          type="text"
+          name="description"
+        />
       </label>
       <label>
-        Question
-        <input name="question" />
+        Question:
+        <input
+          className="bg-gray-500 border-2 border-gray-200 hover:bg-blue-400 rounded p-1 mt-2 w-full"
+          type="text"
+          name="question"
+        />
       </label>
-      <label>
-        Answer 1
-        <input name="answer1" />
-      </label>
-      <label>
-        Answer 2
-        <input name="answer2" />
-      </label>
-      <label>
-        Answer 3
-        <input name="answer3" />
-      </label>
-      <label>
-        Answer 4
-        <input name="answer4" />
-      </label>
-      <label>
-        Correct Answer
-        <select name="correctAnswer">
-          <option value="1">Answer 1</option>
-          <option value="2">Answer 2</option>
-          <option value="3">Answer 3</option>
-          <option value="4">Answer 4</option>
-        </select>
-      </label>
-      <button type="submit">Create Quiz</button>
+      <div className="my-4" />
+      <Answer id={1} />
+      <Answer id={2} />
+      <Answer id={3} />
+      <button
+        type="submit"
+        className="bg-gray-500 border-2 border-gray-200 hover:bg-blue-700 rounded p-2 mt-4 w-full transition-all"
+      >
+        Create Quiz
+      </button>
     </form>
   );
 }

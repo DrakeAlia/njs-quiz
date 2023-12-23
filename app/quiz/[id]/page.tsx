@@ -14,7 +14,7 @@ async function Quiz({
   // More information in the README.md file
   let answers = await sql`
   SELECT
-    q.quiz_id
+    q.quiz_id,
     q.title AS quiz_title,
     q.description AS quiz_description,
     q.question_text AS quiz_question,
@@ -36,12 +36,12 @@ async function Quiz({
     <div>
       <h1 className="text-4xl font-bold">{answers[0].quiz_title}</h1>
       <p>{answers[0].quiz_description}</p>
-      <p>{answers[0].question}</p>
+      <p>{answers[0].quiz_question}</p>
       <ul>
         {answers.map((answer) => (
           <li key={answer.answer_id}>
             {answer.answer_text}
-            {searchParams.show === "true" && answer.is_correct ? " ✅" : " ❌"}
+            {searchParams.show === "true" && answer.is_correct && " ✅"}
           </li>
         ))}
       </ul>

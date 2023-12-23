@@ -1,9 +1,10 @@
 import Link from "next/link";
 import postgres from "postgres";
+import QuizForm from "./quiz-form";
 
 const sql = postgres(process.env.POSTGRES_URL!);
 
-// create a quiz type to represent the data from the database
+// Create a quiz type to represent the data from the database
 // quiz_id: This property is of type number. It likely represents a 
 // unique identifier for each quiz.
 // title: This property is of type string. It likely represents the 
@@ -37,6 +38,7 @@ export default function Home() {
     <section className="flex flex-col items-center text-center mt-2 py-5">
       <h1 className="text-4xl font-bold">All Quizzes</h1>
       <Quizzes />
+      <QuizForm />
     </section>
   );
 }
