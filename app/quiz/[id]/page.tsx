@@ -1,12 +1,13 @@
+import { redirect } from "next/navigation";
 import postgres from "postgres";
 
-const sql = postgres(process.env.DATABASE_URL!);
+const sql = postgres(process.env.POSTGRES_URL!);
 
 async function Quiz({
   id,
   searchParams,
 }: {
-  id: number;
+  id: string;
   searchParams: { show?: string };
 }) {
   // get the quiz from the database
@@ -40,7 +41,7 @@ async function Quiz({
         {answers.map((answer) => (
           <li key={answer.answer_id}>
             {answer.answer_text}
-            {searchParams.show === "true" && answer.is_correct ? "✅" : "❌"}
+            {searchParams.show === "true" && answer.is_correct ? " ✅" : " ❌"}
           </li>
         ))}
       </ul>
@@ -57,8 +58,18 @@ export default function QuizPage({
 }) {
   return (
     <section className="flex flex-col items-center text-center mt-2 py-5 and mx-auto">
-      <h1 className="text-4xl font-bold">Quiz {params.id}</h1>
-      <p>show: {searchParams.show}</p>
+      <Quiz id={params.id} searchParams={searchParams} />
+      <form
+        action={async () => {
+          "use server";
+          redirect(`/quiz/${params.id}?show=true`);
+        }}
+      >
+        <button>Show Answers</button>
+      </form>
     </section>
   );
 }
+
+// use server will update the url in the browser to the url that is passed in as an argument. In this case, it will update the url to /quiz/1?show=true.
+// this replaces having to create a api endpoint and then redirecting to that endpoint.

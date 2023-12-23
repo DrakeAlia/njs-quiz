@@ -1,7 +1,7 @@
 import Link from "next/link";
 import postgres from "postgres";
 
-const sql = postgres(process.env.DATABASE_URL!);
+const sql = postgres(process.env.POSTGRES_URL!);
 
 // create a quiz type to represent the data from the database
 // quiz_id: This property is of type number. It likely represents a 
@@ -16,7 +16,9 @@ type Quiz = {
 // Fetches data from a database and renders a list of quizzes.
 async function Quizzes() {
   // get all the quizzes from the database
-  const quizzes: Quiz[] = await sql`SELECT * FROM quizzes`;
+  const quizzes: Quiz[] = await sql`
+  SELECT * FROM quizzes
+  `;
 
   return (
     <ul>
